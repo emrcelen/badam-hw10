@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class KonuRepo {
-    public  ArrayList<Konu> getALl()
+    public  ArrayList<Konu> getAll()
     {
         ArrayList<Konu> liste = new ArrayList<>();
         Connection connection = null;
