@@ -4,6 +4,7 @@ import com.garanti.FirstSpringWeb.model.Konu;
 import com.garanti.FirstSpringWeb.repo.KonuRepo;
 import com.garanti.FirstSpringWeb.utilities.results.DataResult;
 import com.garanti.FirstSpringWeb.utilities.results.Result;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "konu")
+@AllArgsConstructor
 public class KonuController {
     /**
      * IoC -> inversion of controller gibi bir şey
@@ -31,19 +33,15 @@ public class KonuController {
 
     private KonuRepo repo;
 
-    public KonuController()
-    {
-        this.repo = new KonuRepo();
-    }
 
     @GetMapping(path = "getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public DataResult<ArrayList<Konu>> getAll()
+    public DataResult<List<Konu>> getAll()
     {
         // localhost:9090/FirstSpringWeb/konu/getAll
-        ArrayList<Konu> values = repo.getAll();
+        List<Konu> values = repo.getAll();
         if(values.size() == 0 || values == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        return new DataResult<ArrayList<Konu>>(values,"Konular Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+        return new DataResult<List<Konu>>(values,"Konular Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
 
     }
 
@@ -78,6 +76,11 @@ public class KonuController {
         if(value == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         return new DataResult<>(value,"Konu Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+    }
+
+    @GetMapping(path = "getNameLike", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataResult<List<Konu>> getNameLike (@RequestParam(value = "name", required = true) String name){
+        return new DataResult<>(repo.getAllLike(name),"Girdiğiniz Parametre ile Eşlesen Konu Bilgileri Getirildi", ResponseEntity.status(HttpStatus.OK).build());
     }
     @DeleteMapping(path = "deleteById/{id}")
     public Result deleteById(@PathVariable(value = "id") Integer id)

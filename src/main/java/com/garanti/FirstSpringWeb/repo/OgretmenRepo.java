@@ -2,194 +2,82 @@ package com.garanti.FirstSpringWeb.repo;
 
 import com.garanti.FirstSpringWeb.Constants;
 import com.garanti.FirstSpringWeb.model.Ogretmen;
+import lombok.AllArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class OgretmenRepo
-{
-    public ArrayList<Ogretmen> getAll()
-    {
-        ArrayList<Ogretmen> liste = new ArrayList<>();
-        Connection connection = null;
-        Statement stmt = null;
-        ResultSet result = null;
-        try
-        {
-            connection = Constants.getConnection();
-            stmt = connection.createStatement();
-            result = stmt.executeQuery("select * from BILGE.OGRETMEN");
-            while (result.next())
-            {
-                Ogretmen temp = new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK"));
-                liste.add(temp);
+@Repository
+@AllArgsConstructor
+public class OgretmenRepo {
+    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    public List<Ogretmen> getAll() {
+        // Incorrect column count: expected 1, actual 3
+        // return jdbcTemplate.queryForList("select * from BILGE.OGRETMEN", Ogretmen.class);
+        RowMapper<Ogretmen> rowMapper = new RowMapper<Ogretmen>() {
+            @Override
+            public Ogretmen mapRow(ResultSet result, int rowNum) throws SQLException {
+                return new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK"));
             }
-        }
-        catch (Exception e)
-        {
-            liste.clear();
-            System.err.println(e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                result.close();
-                stmt.close();
-                connection.close();
-            }
-            catch (SQLException e)
-            {
-                // throw new mybussinessexception()
-            }
-        }
-        return liste;
+        };
+        return jdbcTemplate.query("select * from BILGE.OGRETMEN", rowMapper);
+        //return jdbcTemplate.query("select * from BILGE.OGRETMEN", (ResultSet result, int rowNum) -> new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK")));
+        //return jdbcTemplate.query("select * from BILGE.OGRETMEN", BeanPropertyRowMapper.newInstance(Ogretmen.class));
     }
 
-    public Ogretmen getById(int id)
-    {
+    public Ogretmen getById(int id) {
+
         Ogretmen ogretmen = null;
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try
+        String sql = "select * from BILGE.OGRETMEN where ID = :ABUZIDDIN";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("ABUZIDDIN", id);
+        ogretmen = namedParameterJdbcTemplate.queryForObject(sql, paramMap, BeanPropertyRowMapper.newInstance(Ogretmen.class));
+        // ---------------------------------
+    /*ResultSetExtractor<Ogretmen> rse = new ResultSetExtractor<Ogretmen>()
+    {
+        @Override
+        public Ogretmen extractData(ResultSet result) throws SQLException, DataAccessException
         {
-            connection = Constants.getConnection();
-            stmt = connection.prepareStatement("select * from BILGE.OGRETMEN where ID = ?");
-            stmt.setInt(1, id);
-            result = stmt.executeQuery();
-            while (result.next())
-            {
-                ogretmen = new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK"));
-            }
+            return new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK"));
         }
-        catch (Exception e)
-        {
-            System.err.println(e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                result.close();
-                stmt.close();
-                connection.close();
-            }
-            catch (SQLException e)
-            {
-                // throw new mybussinessexception()
-            }
-        }
+    };
+    namedParameterJdbcTemplate.query(sql, paramMap, rse);*/
+        // ---------------------------------
+        // Incorrect column count: expected 1, actual 3
+        // namedParameterJdbcTemplate.queryForObject(sql, paramMap, Ogretmen.class);
         return ogretmen;
     }
 
-    public boolean deleteById( int id){
-        boolean result = false;
-        Connection connection = null;
-        PreparedStatement stmt = null;
-
-        try
-        {
-            connection = Constants.getConnection();
-            stmt = connection.prepareStatement("delete from BILGE.OGRETMEN where ID = ?");
-            stmt.setInt(1,id);
-            result = stmt.executeUpdate() == 1;
-        }
-        catch (Exception e)
-        {
-            System.err.println(e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                stmt.close();
-                connection.close();
-            }
-            catch (SQLException e)
-            {
-
-            }
-        }
-        return result;
+    public boolean deleteById(int id) {
+        String sql = "delete from BILGE.OGRETMEN where ID = :ID";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("ID", id);
+        return namedParameterJdbcTemplate.update(sql, paramMap) == 1;
     }
 
-    public boolean save ( Ogretmen ogretmen)
-    {
-        boolean result = false ;
-        Connection connection = null;
-        PreparedStatement stmt = null;
-
-        try
-        {
-            connection= Constants.getConnection();
-            stmt = connection.prepareStatement("Insert into BILGE.OGRETMEN (NAME, IS_GICIK) values ( ?, ?)");
-            stmt.setString(1, ogretmen.getNAME());
-            stmt.setBoolean(2, ogretmen.isIS_GICIK());
-            result = stmt.executeUpdate() == 1;
-        }
-        catch (SQLException e)
-        {
-            System.err.println("-> " +e.getClass().getName());
-            System.err.println(e.getMessage());
-        }
-        catch (Exception e)
-        {
-            System.err.println("-> " +e.getClass().getName());
-        }
-        finally
-        {
-            try
-            {
-                stmt.close();;
-                connection.close();
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
-        return result;
+    public boolean save(Ogretmen ogretmen) {
+        String sql = "INSERT INTO BILGE.OGRETMEN (NAME, IS_GICIK) VALUES (:NAME, :IS_GICIK)";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("NAME",ogretmen.getNAME());
+        paramMap.put("IS_GICIK", ogretmen.isIS_GICIK());
+        return namedParameterJdbcTemplate.update(sql,paramMap) == 1;
     }
 
-    public ArrayList<Ogretmen> getAllLike(String name) {
-        ArrayList<Ogretmen> liste = new ArrayList<>();
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try
-        {
-            connection = Constants.getConnection();
-            // isim olarak "%'--" gönderilirse injection olmuş olur
-            //stmt = connection.prepareStatement("select * from BILGE.OGRETMEN where NAME LIKE '%" + name + "%'");
-            stmt = connection.prepareStatement("select * from BILGE.OGRETMEN where NAME LIKE ?");
-            stmt.setString(1, "%" + name + "%");
-            result = stmt.executeQuery();
-            while (result.next())
-            {
-                Ogretmen temp = new Ogretmen(result.getInt("ID"), result.getString("NAME"), result.getBoolean("IS_GICIK"));
-                liste.add(temp);
-            }
-        }
-        catch (Exception e)
-        {
-            liste.clear();
-            System.err.println(e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                result.close();
-                stmt.close();
-                connection.close();
-            }
-            catch (SQLException e)
-            {
-                // throw new mybussinessexception()
-            }
-        }
-        return liste;
+    public List<Ogretmen> getAllLike(String name) {
+        String sql = "select * from BILGE.OGRETMEN where NAME LIKE :NAME";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("NAME", "%" + name + "%");
+        return namedParameterJdbcTemplate.query(sql, paramMap, BeanPropertyRowMapper.newInstance(Ogretmen.class));
     }
 
 

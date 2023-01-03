@@ -4,6 +4,7 @@ import com.garanti.FirstSpringWeb.model.Ogrenci;
 import com.garanti.FirstSpringWeb.repo.OgrenciRepo;
 import com.garanti.FirstSpringWeb.utilities.results.DataResult;
 import com.garanti.FirstSpringWeb.utilities.results.Result;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "ogrenci")
+@AllArgsConstructor
 public class OgrenciController {
     /**
      * IoC -> inversion of controller gibi bir şey
@@ -31,19 +33,14 @@ public class OgrenciController {
 
     private OgrenciRepo repo;
 
-    public OgrenciController()
-    {
-        this.repo = new OgrenciRepo();
-    }
-
     @GetMapping(path = "getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public DataResult<ArrayList<Ogrenci>> getAll()
+    public DataResult<List<Ogrenci>> getAll()
     {
         // localhost:9090/FirstSpringWeb/ogrenci/getAll
-        ArrayList<Ogrenci> values = repo.getAll();
+        List<Ogrenci> values = repo.getAll();
         if(values.size() == 0 || values == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        return new DataResult<ArrayList<Ogrenci>>(values,"Öğrenciler Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+        return new DataResult<List<Ogrenci>>(values,"Öğrenciler Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
 
     }
 
@@ -78,6 +75,11 @@ public class OgrenciController {
         if(value == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         return new DataResult<>(value,"Öğrenci Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+    }
+
+    @GetMapping(path = "getNameLike", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataResult<List<Ogrenci>> getNameLike (@RequestParam(value = "name", required = true) String name){
+        return new DataResult<>(repo.getAllLike(name),"Girdiğiniz Parametre ile Eşlesen Öğrenci Bilgileri Getirildi", ResponseEntity.status(HttpStatus.OK).build());
     }
     @DeleteMapping(path = "deleteById/{id}")
     public Result deleteById(@PathVariable(value = "id") Integer id)

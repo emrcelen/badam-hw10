@@ -4,6 +4,7 @@ import com.garanti.FirstSpringWeb.model.Ders_Ogrenci;
 import com.garanti.FirstSpringWeb.repo.Ders_OgrenciRepo;
 import com.garanti.FirstSpringWeb.utilities.results.DataResult;
 import com.garanti.FirstSpringWeb.utilities.results.Result;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "dogr")
+@AllArgsConstructor
 public class DogrController {
     /**
      * IoC -> inversion of controller gibi bir şey
@@ -31,19 +34,15 @@ public class DogrController {
 
     private Ders_OgrenciRepo repo;
 
-    public DogrController()
-    {
-        this.repo = new Ders_OgrenciRepo();
-    }
 
     @GetMapping(path = "getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public DataResult<ArrayList<Ders_Ogrenci>> getAll()
+    public DataResult<List<Ders_Ogrenci>> getAll()
     {
         // localhost:9090/FirstSpringWeb/dogr/getAll
-        ArrayList<Ders_Ogrenci> values = repo.getAll();
+        List<Ders_Ogrenci> values = repo.getAll();
         if(values.size() == 0 || values == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        return new DataResult<ArrayList<Ders_Ogrenci>>(values,"Ders ve Öğrenci Değerleri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+        return new DataResult<List<Ders_Ogrenci>>(values,"Ders ve Öğrenci Değerleri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
 
     }
 
@@ -79,6 +78,7 @@ public class DogrController {
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         return new DataResult<>(value,"Ders ve Öğrenci Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
     }
+
     @DeleteMapping(path = "deleteById/{id}")
     public Result deleteById(@PathVariable(value = "id") Integer id)
     {

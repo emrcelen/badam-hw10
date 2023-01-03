@@ -4,6 +4,7 @@ import com.garanti.FirstSpringWeb.model.Ders;
 import com.garanti.FirstSpringWeb.repo.DersRepo;
 import com.garanti.FirstSpringWeb.utilities.results.DataResult;
 import com.garanti.FirstSpringWeb.utilities.results.Result;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "ders")
+@AllArgsConstructor
 public class DersController {
     /**
      * IoC -> inversion of controller gibi bir şey
@@ -31,19 +33,15 @@ public class DersController {
 
     private DersRepo repo;
 
-    public DersController()
-    {
-        this.repo = new DersRepo();
-    }
 
     @GetMapping(path = "getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public DataResult<ArrayList<Ders>> getAll()
+    public DataResult<List<Ders>> getAll()
     {
         // localhost:9090/FirstSpringWeb/ders/getAll
-        ArrayList<Ders> values = repo.getAll();
+        List<Ders> values = repo.getAll();
         if(values.size() == 0 || values == null)
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        return new DataResult<ArrayList<Ders>>(values,"Ders Değerleri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
+        return new DataResult<List<Ders>>(values,"Ders Değerleri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
 
     }
 
@@ -79,6 +77,7 @@ public class DersController {
             return new DataResult<>("Veri Seti Boş",ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         return new DataResult<>(value,"Ders Değeri Getirildi.",ResponseEntity.status(HttpStatus.OK).build());
     }
+
     @DeleteMapping(path = "deleteById/{id}")
     public Result deleteById(@PathVariable(value = "id") Integer id)
     {
